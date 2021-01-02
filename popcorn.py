@@ -5,6 +5,7 @@ from Config import *
 from Brick import Brick
 from Coordinate import Coordinate
 from Ball import Ball
+from BrickInfo import *
 import compileall
 compileall.compile_dir("./")
 
@@ -17,30 +18,49 @@ class Game:
     def __init__(self):
         pygame.init()
         self.my_pygame = pygame
-        self.screen: pygame.Surface = self.my_pygame.display.set_mode((1000, 600))
+        self.screen = self.my_pygame.display.set_mode((1000, 600))
+        self.ball_surface = pygame.Surface((1000, 600))
+        self.surface = self.screen
         self.icon = self.my_pygame.image.load(STICK_TEXTURE)
         self.my_pygame.display.set_icon(self.icon)
         self.stick_img = self.my_pygame.image.load(STICK_TEXTURE)
         
     def get_mouse(self)-> Coordinate: 
         return Coordinate(game.my_pygame.mouse.get_pos())
+    
+    
+    def draw_bricks(self, bricks: [])-> None:
+        self.begin_update(self.screen)
+        for brick in bricks:
+            pygame.draw.rect(self.surface,
+                             pygame.Color(COLOR_BLUE),
+                             pygame.Rect(brick.left_point.x,
+                             brick.left_point.y,
+                             brick.offsets.x,
+                             brick.offsets.y))
+        self.end_update()
+        pass
+    
 
-    def begin_update(self, screen: pygame.Surface):
-        screen.fill((0, 0, 0))
+    def begin_update(self, surface):
+        surface.fill((0, 0, 0))
         return True
 
-    def end_update(self, my_pygame: pygame):
-        my_pygame.display.update()
+    def end_update(self):
+        pygame.display.update()
         return True
+    
+game = Game()
 ball = Ball()
 ball.move_up_right = True
-game = Game()
 bricks = Brick()
 stick = Stick()
 clock = pygame.time.Clock()
+bricks_info: BrickInfo = bricks.get_info()
+game.draw_bricks(bricks_info)
  
 while game.running:
-    game.begin_update(game.screen)
+    game.begin_update(game.ball_surface)
     for event in game.my_pygame.event.get():
         if event.type == QUIT:
             game.running = False
@@ -58,8 +78,12 @@ while game.running:
     #ball.move(game.screen) 
     ball.level_brick_x = bricks.level.brick_x
     ball.level_brick_y = bricks.level.brick_y  
-    ball.move(game.screen) 
-    bricks.draw(game.screen, pygame)
+    ball.move(game.ball_surface) 
+    
+    
+    
+    
+
     
     """
     class collision_info:
@@ -92,5 +116,5 @@ while game.running:
     """
     
     #stick.move(game.screen) 
-    game.end_update(game.my_pygame)
+    game.end_update()
     clock.tick(200)
